@@ -1,0 +1,81 @@
+<!--
+ * @Author: Guoxin Wang
+ * @Date: 2025-10-29 12:48:16
+ * @LastEditors: Guoxin Wang
+ * @LastEditTime: 2025-11-21 00:00:00
+ * @FilePath: /AnnoDesignerWEB/index.html
+ * @Description: 
+ * 
+ * Copyright (c) 2025 by Guoxin Wang, All Rights Reserved. 
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Anno Designer Web</title>
+        <link rel="stylesheet" href="./style.css" />
+        <meta
+            name="description"
+            content="Anno Designer Web - A tool for designing Anno game layouts"
+        />
+    </head>
+    <body>
+        <div id="app"></div>
+
+        <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+        <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+        <script
+            type="text/babel"
+            data-presets="env,react"
+            src="./src/utils/constants.js"
+        ></script>
+        <script
+            type="text/babel"
+            data-presets="env,react"
+            src="./src/utils/core.js"
+        ></script>
+        <script
+            type="text/babel"
+            data-presets="env,react"
+            src="./src/global/keyboard.js"
+        ></script>
+        <script
+            type="text/babel"
+            data-presets="env,react"
+            src="./src/hooks/useAssets.jsx"
+        ></script>
+        <script
+            type="text/babel"
+            data-presets="env,react"
+            src="./src/components/Sidebar.jsx"
+        ></script>
+        <script
+            type="text/babel"
+            data-presets="env,react"
+            src="./src/components/Toolbar.jsx"
+        ></script>
+        <script
+            type="text/babel"
+            data-presets="env,react"
+            src="./src/components/Inspector.jsx"
+        ></script>
+        <script
+            type="text/babel"
+            data-presets="env,react"
+            src="./src/components/Canvas.jsx"
+        ></script>
+        <script
+            type="text/babel"
+            data-presets="env,react"
+            src="./src/App.jsx"
+        ></script>
+        <script
+            type="text/babel"
+            data-presets="env,react"
+            src="./src/index.jsx"
+        ></script>
+    </body>
+</html>
