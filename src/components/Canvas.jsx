@@ -2,7 +2,7 @@
  * @Author: Guoxin Wang
  * @Date: 2025-10-29 12:50:50
  * @LastEditors: Guoxin Wang
- * @LastEditTime: 2025-11-21 16:00:25
+ * @LastEditTime: 2025-11-26 16:46:24
  * @FilePath: /AnnoDesignerWEB/src/components/Canvas.jsx
  * @Description:
  *
@@ -38,6 +38,7 @@ function Canvas({
     const wrapRef = useRef(null);
     const lastMouse = useRef({ x: 0, y: 0 });
 
+    const pendingScrollRef = useRef(null);
     const zoomRef = useRef(zoom);
     const placingRef = useRef(placing);
     // const placeModeRef = useRef(placeMode);
@@ -47,10 +48,8 @@ function Canvas({
     const altDownRef = useRef(altDown);
     const mouseDownRef = useRef(mouseDown);
     const panStart = useRef({ x: 0, y: 0, sx: 0, sy: 0 });
+    const selectStart = useRef({ x: 0, y: 0 });
 
-    useEffect(() => {
-        zoomRef.current = zoom;
-    }, [zoom]);
     useEffect(() => {
         placingRef.current = placing;
     }, [placing]);
@@ -72,29 +71,18 @@ function Canvas({
 
     // zoom with mouse wheel
     useEffect(() => {
+        zoomRef.current = zoom;
         const wrap = wrapRef.current;
-        if (!wrap) return;
-        const onWheel = (e) => {
-            e.preventDefault();
-            const rect = wrap.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left + wrap.scrollLeft;
-            const mouseY = e.clientY - rect.top + wrap.scrollTop;
-            const dz = e.deltaY < 0 ? 0.1 : -0.1;
-            const newZoom = clamp(+(zoomRef.current + dz).toFixed(2), 0.5, 2.0);
-            const scaleRatio = newZoom / zoomRef.current;
-            const newScrollLeft = mouseX * scaleRatio - (e.clientX - rect.left);
-            const newScrollTop = mouseY * scaleRatio - (e.clientY - rect.top);
-            setZoom(newZoom);
-            requestAnimationFrame(() => {
-                wrap.scrollLeft = newScrollLeft;
-                wrap.scrollTop = newScrollTop;
-            });
-        };
-        wrap.addEventListener("wheel", onWheel, { passive: false });
-        return () => wrap.removeEventListener("wheel", onWheel);
-    }, []);
+        const p = pendingScrollRef.current;
+        if (!wrap || !p) return;
+        const maxL = wrap.scrollWidth - wrap.clientWidth;
+        const maxT = wrap.scrollHeight - wrap.clientHeight;
+        wrap.scrollLeft = clamp(p.left, 0, Math.max(0, maxL));
+        wrap.scrollTop = clamp(p.top, 0, Math.max(0, maxT));
+        pendingScrollRef.current = null;
+    }, [zoom]);
 
-    // event mouse:
+    // mouse event:
     // placing: ghost with move, place with move, right click deselect
     // panning: alt+drag to pan
     // select: empty click deselect, right click deselect
@@ -107,12 +95,16 @@ function Canvas({
             // panning has first priority
             if (altDownRef.current && mouseDownRef.current) {
                 wrap.scrollLeft =
-                    panStart.current.sx - (e.clientX - panStart.current.x);
+                    panStart.current.sx -
+                    (lastMouse.current.x - panStart.current.x);
                 wrap.scrollTop =
                     panStart.current.sy - (e.clientY - panStart.current.y);
             } else if (placingRef.current) {
                 const g = computeGhost(placingRef.current, gRotRef.current);
                 if (mouseDownRef.current && g.can) placeOne(g);
+            } else if (mouseDownRef.current) {
+                const newSelected = computeSelection();
+                setSelected(newSelected);
             }
         }
         function onMouseDown(e) {
@@ -138,6 +130,10 @@ function Canvas({
             } else if (!e.target.closest("[data-placed]")) {
                 // deselect when clicking on empty space
                 setSelected([]);
+                selectStart.current = {
+                    x: lastMouse.current.x,
+                    y: lastMouse.current.y,
+                };
             }
             // if (placeModeRef.current === "once") {
             //     setPlacing(null);
@@ -154,6 +150,7 @@ function Canvas({
             setPlacing(null);
             setPlaceMode("none");
             setGhost((g) => ({ ...g, visible: false }));
+            setSelected([]);
         }
         function onLeave(e) {
             e.preventDefault();
@@ -161,17 +158,39 @@ function Canvas({
             setMouseDown(false);
             setAltDown(false);
         }
+        function onWheel(e) {
+            e.preventDefault();
+            const rect = wrap.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+            const oldZoom = zoomRef.current;
+            const dz = e.deltaY < 0 ? 0.1 : -0.1;
+            const newZoom = clamp(
+                Math.round((oldZoom + dz) * 100) / 100,
+                0.5,
+                2.0
+            );
+            const anchorX = (wrap.scrollLeft + mx) / oldZoom;
+            const anchorY = (wrap.scrollTop + my) / oldZoom;
+            pendingScrollRef.current = {
+                left: anchorX * newZoom - mx,
+                top: anchorY * newZoom - my,
+            };
+            setZoom(newZoom);
+        }
         wrap.addEventListener("mousemove", onMove);
         wrap.addEventListener("mousedown", onMouseDown);
         wrap.addEventListener("mouseup", onMouseUp);
         wrap.addEventListener("contextmenu", onContextMenu);
         wrap.addEventListener("mouseleave", onLeave);
+        wrap.addEventListener("wheel", onWheel, { passive: false });
         return () => {
             wrap.removeEventListener("mousemove", onMove);
             wrap.removeEventListener("mousedown", onMouseDown);
             wrap.removeEventListener("mouseup", onMouseUp);
             wrap.removeEventListener("contextmenu", onContextMenu);
             wrap.removeEventListener("mouseleave", onLeave);
+            wrap.removeEventListener("wheel", onWheel);
         };
     }, []);
 
@@ -253,7 +272,7 @@ function Canvas({
         const wrap = wrapRef.current;
         if (!wrap) return;
         function onKeyDown(e) {
-            if (e.key === "Alt") {
+            if (e.key === "Alt" && !mouseDownRef.current) {
                 setAltDown(true);
             }
         }
@@ -270,6 +289,14 @@ function Canvas({
         };
     }, []);
 
+    function getWorldPos(x, y) {
+        const wrap = wrapRef.current;
+        if (!wrap) return { x: 0, y: 0 };
+        const rect = wrap.getBoundingClientRect();
+        const worldX = (x - rect.left + wrap.scrollLeft) / zoomRef.current;
+        const worldY = (y - rect.top + wrap.scrollTop) / zoomRef.current;
+        return { x: worldX, y: worldY };
+    }
     function aabbIntersects(a, b) {
         return !(
             a.x + a.w <= b.x ||
@@ -286,12 +313,9 @@ function Canvas({
             ghostRef.current = hidden(ghostRef.current);
             return ghostRef.current;
         }
-        const rect = wrap.getBoundingClientRect();
-        const worldX =
-            (lastMouse.current.x - rect.left + wrap.scrollLeft) /
-            zoomRef.current;
-        const worldY =
-            (lastMouse.current.y - rect.top + wrap.scrollTop) / zoomRef.current;
+        const worldPos = getWorldPos(lastMouse.current.x, lastMouse.current.y);
+        const worldX = worldPos.x;
+        const worldY = worldPos.y;
         const wt = b.BuildBlocker?.x || 1;
         const ht = b.BuildBlocker?.z || 1;
         const swap = rot % 180 !== 0;
@@ -306,14 +330,18 @@ function Canvas({
         const inBounds =
             x >= 0 && y >= 0 && x + wTiles <= GRID_W && y + hTiles <= GRID_H;
         const candidate = { x, y, w: wTiles, h: hTiles };
-        const blocked = placedRef.current.some((it) =>
-            aabbIntersects(candidate, {
-                x: it.x,
-                y: it.y,
-                w: it.w,
-                h: it.h,
-            })
-        );
+        const blocked = placedRef.current.some((it) => {
+            const roadCross =
+                it.b?.Identifier !== b.Identifier && b.Road && it.b?.Road;
+            return (
+                aabbIntersects(candidate, {
+                    x: it.x,
+                    y: it.y,
+                    w: it.w,
+                    h: it.h,
+                }) && !roadCross
+            );
+        });
         const nextGhost = {
             visible: true,
             ...candidate,
@@ -322,6 +350,36 @@ function Canvas({
         setGhost(nextGhost);
         ghostRef.current = nextGhost;
         return nextGhost;
+    }
+    function computeSelection() {
+        const wrap = wrapRef.current;
+        if (!wrap) {
+            return [];
+        }
+        const startPos = getWorldPos(
+            selectStart.current.x,
+            selectStart.current.y
+        );
+        const startX = startPos.x;
+        const startY = startPos.y;
+        const worldPos = getWorldPos(lastMouse.current.x, lastMouse.current.y);
+        const worldX = worldPos.x;
+        const worldY = worldPos.y;
+        const candidate = {
+            x: Math.min(startX, worldX),
+            y: Math.min(startY, worldY),
+            w: Math.abs(worldX - startX),
+            h: Math.abs(worldY - startY),
+        };
+        const newSelected = placedRef.current.filter((it) =>
+            aabbIntersects(candidate, {
+                x: it.x,
+                y: it.y,
+                w: it.w,
+                h: it.h,
+            })
+        );
+        return newSelected;
     }
 
     function placeOne(ghost) {
@@ -448,7 +506,7 @@ function Canvas({
                     y="0"
                     width={wTiles}
                     height={hTiles}
-                    fill={annoColorCSS(it.b, 1, schemeColors) || "none"}
+                    fill={annoColorCSS(it.b, null, schemeColors) || "none"}
                     stroke="#000"
                     strokeWidth={it.b.Borderless ? 0 : 1}
                     vectorEffect="non-scaling-stroke"
@@ -566,10 +624,34 @@ function Canvas({
                         .map((it) => (
                             <Selected it={it} />
                         ))}
-                    {placing &&
-                        ghost.visible &&
-                        (() => <Placing b={placing} />)()}
+                    {placing && ghost.visible && <Placing b={placing} />}
                 </g>
+                {mouseDown &&
+                    !altDown &&
+                    !placing &&
+                    (() => {
+                        const startPos = getWorldPos(
+                            selectStart.current.x,
+                            selectStart.current.y
+                        );
+                        const worldPos = getWorldPos(
+                            lastMouse.current.x,
+                            lastMouse.current.y
+                        );
+                        return (
+                            <rect
+                                x={Math.min(startPos.x, worldPos.x)}
+                                y={Math.min(startPos.y, worldPos.y)}
+                                width={Math.abs(startPos.x - worldPos.x)}
+                                height={Math.abs(startPos.y - worldPos.y)}
+                                fill="rgba(0, 98, 255, 0.3)"
+                                stroke="#0062ffff"
+                                strokeWidth={1}
+                                vectorEffect="non-scaling-stroke"
+                                pointerEvents="none"
+                            />
+                        );
+                    })()}
             </svg>
         </div>
     );

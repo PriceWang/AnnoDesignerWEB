@@ -15,6 +15,11 @@
                     "Color": { "A": 255, "R": 169, "G": 169, "B": 169 }
                 },
                 {
+                    "TargetTemplate": "Rail",
+                    "TargetIdentifiers": ["Rail"],
+                    "Color": { "A": 255, "R": 139, "G": 69, "B": 19 }
+                },
+                {
                     "TargetTemplate": "FactoryBuilding",
                     "TargetIdentifiers": [
                         "ToolmakerWorkshop",

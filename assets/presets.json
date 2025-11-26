@@ -40847,7 +40847,7 @@
         {
             "BlockedAreaLength": 0.0,
             "BlockedAreaWidth": 0.0,
-            "Borderless": false,
+            "Borderless": true,
             "BuildBlocker": {
                 "x": 1,
                 "z": 1
@@ -40870,7 +40870,7 @@
                 "rus": "Ирригационный канал",
                 "zhs": "水渠"
             },
-            "Road": false,
+            "Road": true,
             "Template": "WaterCanal"
         },
         {
@@ -41974,6 +41974,35 @@
             },
             "Road": true,
             "Template": "Road"
+        },
+        {
+            "BlockedAreaLength": 0.0,
+            "BlockedAreaWidth": 0.0,
+            "Borderless": true,
+            "BuildBlocker": {
+                "x": 1,
+                "z": 1
+            },
+            "Direction": "Down",
+            "Faction": "Common",
+            "Group": null,
+            "Guid": 0,
+            "Header": "Tiles",
+            "IconFileName": null,
+            "Identifier": "Rail",
+            "InfluenceRadius": 0.0,
+            "InfluenceRange": 0.0,
+            "Localization": {
+                "eng": "Rail",
+                "esp": "Ferrocarril",
+                "fra": "Chemin de fer",
+                "ger": "Bahn",
+                "pol": "Kolej",
+                "rus": "Железная дорога",
+                "zhs": "铁路"
+            },
+            "Road": true,
+            "Template": "Rail"
         },
         {
             "BlockedAreaLength": 0.0,

@@ -2,12 +2,33 @@
  * @Author: Guoxin Wang
  * @Date: 2025-10-29 12:48:16
  * @LastEditors: Guoxin Wang
- * @LastEditTime: 2025-11-21 19:59:22
+ * @LastEditTime: 2025-11-26 16:44:07
  * @FilePath: /AnnoDesignerWEB/src/utils/core.js
  * @Description:
  *
  * Copyright (c) 2025 by Guoxin Wang, All Rights Reserved.
  */
+
+function useAssets() {
+    const [presets, setPresets] = useState(null);
+    const [treeLoc, setTreeLoc] = useState(null);
+    const [colors, setColors] = useState(null);
+    const [error, setError] = useState(null);
+    useEffect(() => {
+        Promise.all([
+            loadJSON("./assets/presets.json"),
+            loadJSON("./assets/treeLocalization.json"),
+            loadJSON("./assets/colors.json"),
+        ])
+            .then(([p, t, c]) => {
+                setPresets(p);
+                setTreeLoc(t);
+                setColors(c);
+            })
+            .catch((e) => setError(e.message));
+    }, []);
+    return { presets, treeLoc, colors, error };
+}
 
 function annoColorCSS(b, alpha, schemeColors) {
     const color = (() => {
@@ -19,7 +40,15 @@ function annoColorCSS(b, alpha, schemeColors) {
         return colorObj ? colorObj.Color : null;
     })();
     return color
-        ? "rgba(" + color.R + "," + color.G + "," + color.B + "," + alpha + ")"
+        ? "rgba(" +
+              color.R +
+              "," +
+              color.G +
+              "," +
+              color.B +
+              "," +
+              (alpha ?? color.A / 255) +
+              ")"
         : null;
 }
 
@@ -88,6 +117,7 @@ function apply(el, cur) {
     el.style.cursor = cur || "";
 }
 
+window.useAssets = useAssets;
 window.annoColorCSS = annoColorCSS;
 window.loadJSON = loadJSON;
 window.groupByVersionAndGroup = groupByVersionAndGroup;

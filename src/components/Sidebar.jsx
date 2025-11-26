@@ -2,7 +2,7 @@
  * @Author: Guoxin Wang
  * @Date: 2025-10-29 12:48:16
  * @LastEditors: Guoxin Wang
- * @LastEditTime: 2025-11-21 20:39:20
+ * @LastEditTime: 2025-11-26 13:28:08
  * @FilePath: /AnnoDesignerWEB/src/components/Sidebar.jsx
  * @Description:
  *
@@ -164,7 +164,7 @@ function Sidebar({
             >
                 <img
                     style={{
-                        backgroundColor: annoColorCSS(b, 1, schemeColors),
+                        backgroundColor: annoColorCSS(b, null, schemeColors),
                         width: "70%",
                     }}
                 />

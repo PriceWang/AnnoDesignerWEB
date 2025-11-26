@@ -2,7 +2,7 @@
  * @Author: Guoxin Wang
  * @Date: 2025-10-29 12:48:16
  * @LastEditors: Guoxin Wang
- * @LastEditTime: 2025-11-13 11:10:06
+ * @LastEditTime: 2025-11-26 13:50:56
  * @FilePath: /AnnoDesignerWEB/src/utils/constants.js
  * @Description:
  *
@@ -10,7 +10,7 @@
  */
 const { useEffect, useRef, useState, useMemo, useCallback } = React;
 const TILE = 10;
-const GRID_W = 2500;
+const GRID_W = 3000;
 const GRID_H = 2000;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 window.useEffect = useEffect;
