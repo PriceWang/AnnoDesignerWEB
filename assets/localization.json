@@ -169,7 +169,7 @@
             "Trade": "Trade",
             "TundraModules": "Tundra Modules",
             "UncommonAnimals": "Uncommon Animals",
-            "(WEB)Search": "Search"
+            "(SIDEBAR)Search": "Search"
         },
         "esp": {
             "(01)Farmers": "(01) Agricultores",
@@ -340,7 +340,7 @@
             "Trade": "Comercio",
             "TundraModules": "Módulos Tundra",
             "UncommonAnimals": "Animales poco comunes",
-            "(WEB)Search": "Buscar"
+            "(SIDEBAR)Search": "Buscar"
         },
         "fra": {
             "(01)Farmers": "(01) Fermiers",
@@ -511,7 +511,7 @@
             "Trade": "Échange",
             "TundraModules": "Modules de la Toundra",
             "UncommonAnimals": "Animaux inhabituels",
-            "(WEB)Search": "Recherche"
+            "(SIDEBAR)Search": "Recherche"
         },
         "ger": {
             "(01)Farmers": "(01) Bauern",
@@ -682,7 +682,7 @@
             "Trade": "Handel",
             "TundraModules": "Tundra-Module",
             "UncommonAnimals": "Ungewöhnliche Tiere",
-            "(WEB)Search": "Suchen"
+            "(SIDEBAR)Search": "Suchen"
         },
         "ita": {
             "(01)Farmers": "(01) Contadini",
@@ -853,7 +853,7 @@
             "Trade": "Commercio",
             "TundraModules": "Moduli Tundra",
             "UncommonAnimals": "Animali non comuni",
-            "(WEB)Search": "Cerca"
+            "(SIDEBAR)Search": "Cerca"
         },
         "pol": {
             "(01)Farmers": "(01) Farmerzy",
@@ -1024,7 +1024,7 @@
             "Trade": "Handel",
             "TundraModules": "Moduły Tundry",
             "UncommonAnimals": "Zwierzęta niezwykłe",
-            "(WEB)Search": "Szukaj"
+            "(SIDEBAR)Search": "Szukaj"
         },
         "rus": {
             "(01)Farmers": "(01) Фермеры",
@@ -1195,7 +1195,7 @@
             "Trade": "Торговля",
             "TundraModules": "Модули тундры",
             "UncommonAnimals": "Необычные животные",
-            "(WEB)Search": "Поиск"
+            "(SIDEBAR)Search": "Поиск"
         },
         "zhs": {
             "(01)Farmers": "(01) 农夫",
@@ -1366,7 +1366,7 @@
             "Trade": "贸易",
             "TundraModules": "寒漠模块",
             "UncommonAnimals": "罕见动物",
-            "(WEB)Search": "搜索"
+            "(SIDEBAR)Search": "搜索"
         },
         "zht": {
             "(01)Farmers": "(01) 農夫",
@@ -1537,7 +1537,7 @@
             "Trade": "貿易",
             "TundraModules": "寒漠模組",
             "UncommonAnimals": "罕見動物",
-            "(WEB)Search": "搜尋"
+            "(SIDEBAR)Search": "搜尋"
         }
     }
 }

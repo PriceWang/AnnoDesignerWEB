@@ -2,7 +2,7 @@
  * @Author: Guoxin Wang
  * @Date: 2025-10-29 12:48:16
  * @LastEditors: Guoxin Wang
- * @LastEditTime: 2025-12-02 14:56:23
+ * @LastEditTime: 2025-12-02 16:11:21
  * @FilePath: /AnnoDesignerWEB/src/components/Sidebar.jsx
  * @Description:
  *
@@ -251,7 +251,7 @@ function Sidebar({
                 <input
                     id="sidebar-search"
                     className="search"
-                    placeholder={currentWebLoc["(WEB)Search"] || "Search"}
+                    placeholder={currentWebLoc["(SIDEBAR)Search"] || "Search"}
                     value={filterText}
                     onChange={(e) => setFilterText(e.target.value.trimStart())}
                 />
