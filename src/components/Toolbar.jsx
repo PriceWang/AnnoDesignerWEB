@@ -1,13 +1,14 @@
-function Toolbar({
-    loc,
-    setLoc,
-    placed,
-    setPlaced,
-    zoom,
-    setZoom,
-    placing,
-    placeMode,
-}) {
+/*
+ * @Author: Guoxin Wang
+ * @Date: 2025-10-29 12:48:16
+ * @LastEditors: Guoxin Wang
+ * @LastEditTime: 2025-12-01 13:27:13
+ * @FilePath: /AnnoDesignerWEB/src/components/Toolbar.jsx
+ * @Description:
+ *
+ * Copyright (c) 2025 by Guoxin Wang, All Rights Reserved.
+ */
+function Toolbar({ loc, setLoc, placed, setPlaced, zoom, setZoom, placing }) {
     function exportJSON() {
         const blob = new Blob([JSON.stringify(placed, null, 2)], {
             type: "application/json",
@@ -64,7 +65,6 @@ function Toolbar({
                 <span className="button">
                     放置中：
                     {placing.Localization?.zhs || placing.Localization?.eng}
-                    {placeMode === "once" ? "（一次）" : "（连续）"}
                 </span>
             )}
             <button

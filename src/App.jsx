@@ -1,10 +1,20 @@
+/*
+ * @Author: Guoxin Wang
+ * @Date: 2025-10-29 12:50:50
+ * @LastEditors: Guoxin Wang
+ * @LastEditTime: 2025-12-02 13:14:22
+ * @FilePath: /AnnoDesignerWEB/src/App.jsx
+ * @Description:
+ *
+ * Copyright (c) 2025 by Guoxin Wang, All Rights Reserved.
+ */
+
 function App() {
     const { presets, treeLoc, colors, error } = useAssets();
     const [loc, setLoc] = useState("eng");
     const [placed, setPlaced] = useState([]);
     const [selected, setSelected] = useState([]);
-    const [placing, setPlacing] = useState(null);
-    const [placeMode, setPlaceMode] = useState("none");
+    const [placing, setPlacing] = useState([]);
     const [zoom, setZoom] = useState(1);
 
     // hydrate from localStorage (must be declared before early returns to keep hooks order constant)
@@ -60,7 +70,6 @@ function App() {
                 placing={placing}
                 setPlacing={setPlacing}
                 setSelected={setSelected}
-                setPlaceMode={setPlaceMode}
             />
             <div className="center">
                 <div className="toolbar-wrap">
@@ -72,7 +81,6 @@ function App() {
                         zoom={zoom}
                         setZoom={setZoom}
                         placing={placing}
-                        placeMode={placeMode}
                         onResetView={() => {
                             // Use ref instead of direct DOM query for better performance and React patterns
                             const stageElement =
@@ -94,8 +102,6 @@ function App() {
                     setZoom={setZoom}
                     placing={placing}
                     setPlacing={setPlacing}
-                    placeMode={placeMode}
-                    setPlaceMode={setPlaceMode}
                     placed={placed}
                     setPlaced={setPlaced}
                     selected={selected}

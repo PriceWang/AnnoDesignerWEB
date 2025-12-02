@@ -2,7 +2,7 @@
  * @Author: Guoxin Wang
  * @Date: 2025-10-29 12:48:16
  * @LastEditors: Guoxin Wang
- * @LastEditTime: 2025-11-26 16:44:07
+ * @LastEditTime: 2025-12-01 13:29:04
  * @FilePath: /AnnoDesignerWEB/src/utils/core.js
  * @Description:
  *
@@ -30,6 +30,14 @@ function useAssets() {
     return { presets, treeLoc, colors, error };
 }
 
+function useLatest(value) {
+    const ref = useRef(value);
+    useLayoutEffect(() => {
+        ref.current = value;
+    }, [value]);
+    return ref;
+}
+
 function annoColorCSS(b, alpha, schemeColors) {
     const color = (() => {
         const colorObj = schemeColors.find((c) => {
@@ -50,6 +58,15 @@ function annoColorCSS(b, alpha, schemeColors) {
               (alpha ?? color.A / 255) +
               ")"
         : null;
+}
+
+function aabbIntersects(a, b) {
+    return !(
+        a.x + a.w <= b.x ||
+        b.x + b.w <= a.x ||
+        a.y + a.h <= b.y ||
+        b.y + b.h <= a.y
+    );
 }
 
 function packPlacedForSave(b, ghost, gRot) {
@@ -88,38 +105,7 @@ async function loadJSON(path) {
     return r.json();
 }
 
-function groupByVersionAndGroup(buildings) {
-    const map = {};
-    for (const b of buildings) {
-        const version = (b.Header || "未知").trim();
-        const grp = b.Group || (b.Road ? "Roads" : "Misc");
-        if (!map[version]) map[version] = { groups: {}, counts: 0 };
-        if (!map[version].groups[grp]) map[version].groups[grp] = [];
-        map[version].groups[grp].push(b);
-        map[version].counts++;
-    }
-    return map;
-}
-
-function isEditable(el) {
-    if (!el) return false;
-    const tn = (el.tagName || "").toUpperCase();
-    return (
-        el.isContentEditable ||
-        tn === "INPUT" ||
-        tn === "TEXTAREA" ||
-        tn === "SELECT"
-    );
-}
-
-function apply(el, cur) {
-    if (!el) return;
-    el.style.cursor = cur || "";
-}
-
 window.useAssets = useAssets;
 window.annoColorCSS = annoColorCSS;
+window.aabbIntersects = aabbIntersects;
 window.loadJSON = loadJSON;
-window.groupByVersionAndGroup = groupByVersionAndGroup;
-window.isEditable = isEditable;
-window.apply = apply;
