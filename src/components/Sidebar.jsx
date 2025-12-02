@@ -2,7 +2,7 @@
  * @Author: Guoxin Wang
  * @Date: 2025-10-29 12:48:16
  * @LastEditors: Guoxin Wang
- * @LastEditTime: 2025-12-02 13:14:08
+ * @LastEditTime: 2025-12-02 14:19:35
  * @FilePath: /AnnoDesignerWEB/src/components/Sidebar.jsx
  * @Description:
  *
@@ -100,15 +100,9 @@ function Sidebar({
         return DEFAULT_VERSION_HEADER;
     }, [version, headers]);
 
-    // all buildings of current version
-    const buildingsOfCurrentVersion = useMemo(
-        () => buildings.filter((b) => b.Header === currentVersion),
-        [buildings, currentVersion]
-    );
-
     // Faction -> { root, groups } tree structure
     const tree = useMemo(() => {
-        const items = buildingsOfCurrentVersion;
+        const items = buildings.filter((b) => b.Header === currentVersion);
         const facMap = {};
 
         const sortByName = (a, b) =>
@@ -156,21 +150,33 @@ function Sidebar({
             facNames: Object.keys(facMap).sort(),
             orderGroups,
         };
-    }, [buildingsOfCurrentVersion, currentTreeLoc, loc]);
+    }, [buildings, currentTreeLoc, currentVersion, loc]);
 
     // initialize / update collapsed state (on version / language change)
     useEffect(() => {
-        const next = {};
-        for (const fac of tree.facNames) {
-            const fid = `f::${currentVersion}::${fac}`;
-            next[fid] = collapsed?.[fid] ?? true;
-            for (const g of Object.keys(tree.facMap[fac].groups || {})) {
-                const gid = `g::${currentVersion}::${fac}::${g}`;
-                next[gid] = collapsed?.[gid] ?? true;
+        setCollapsed((prev) => {
+            const next = {};
+            for (const fac of tree.facNames) {
+                const fid = `f::${currentVersion}::${fac}`;
+                next[fid] = prev?.[fid] ?? true;
+                for (const g of Object.keys(tree.facMap[fac].groups || {})) {
+                    const gid = `g::${currentVersion}::${fac}::${g}`;
+                    next[gid] = prev?.[gid] ?? true;
+                }
             }
-        }
-        setCollapsed(next);
-    }, [currentVersion, tree, collapsed]);
+
+            // shallow setState
+            const prevKeys = Object.keys(prev || {});
+            const nextKeys = Object.keys(next);
+            if (
+                prevKeys.length === nextKeys.length &&
+                prevKeys.every((k) => prev[k] === next[k])
+            ) {
+                return prev;
+            }
+            return next;
+        });
+    }, [currentVersion, tree]);
 
     // search filter function
     const filterList = useCallback(
@@ -189,10 +195,35 @@ function Sidebar({
         [filterText, loc]
     );
 
-    // buildings list in search mode
+    // all buildings in tree (root + groups)
+    const treeBuildings = useMemo(() => {
+        const result = [];
+        for (const fac of tree.facNames) {
+            const { root, groups } = tree.facMap[fac];
+            result.push(...root);
+            for (const gName of Object.keys(groups || {})) {
+                result.push(...groups[gName]);
+            }
+        }
+        return result;
+    }, [tree]);
+
+    // search scope: all buildings in tree, dedup by Identifier
+    const searchableBuildings = useMemo(() => {
+        const map = new Map();
+        for (const b of treeBuildings) {
+            // keep first occurrence of each Identifier
+            if (b.Identifier && !map.has(b.Identifier)) {
+                map.set(b.Identifier, b);
+            }
+        }
+        return Array.from(map.values());
+    }, [treeBuildings]);
+
+    // search filter function
     const filteredBuildings = useMemo(
-        () => filterList(buildingsOfCurrentVersion),
-        [filterList, buildingsOfCurrentVersion]
+        () => filterList(searchableBuildings),
+        [filterList, searchableBuildings]
     );
 
     // whether there is a unique placing candidate for highlighting
