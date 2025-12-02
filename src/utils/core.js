@@ -2,7 +2,7 @@
  * @Author: Guoxin Wang
  * @Date: 2025-10-29 12:48:16
  * @LastEditors: Guoxin Wang
- * @LastEditTime: 2025-12-01 13:29:04
+ * @LastEditTime: 2025-12-02 14:29:07
  * @FilePath: /AnnoDesignerWEB/src/utils/core.js
  * @Description:
  *
@@ -11,23 +11,23 @@
 
 function useAssets() {
     const [presets, setPresets] = useState(null);
-    const [treeLoc, setTreeLoc] = useState(null);
+    const [webLoc, setWebLoc] = useState(null);
     const [colors, setColors] = useState(null);
     const [error, setError] = useState(null);
     useEffect(() => {
         Promise.all([
             loadJSON("./assets/presets.json"),
-            loadJSON("./assets/treeLocalization.json"),
+            loadJSON("./assets/localization.json"),
             loadJSON("./assets/colors.json"),
         ])
             .then(([p, t, c]) => {
                 setPresets(p);
-                setTreeLoc(t);
+                setWebLoc(t);
                 setColors(c);
             })
             .catch((e) => setError(e.message));
     }, []);
-    return { presets, treeLoc, colors, error };
+    return { presets, webLoc, colors, error };
 }
 
 function useLatest(value) {

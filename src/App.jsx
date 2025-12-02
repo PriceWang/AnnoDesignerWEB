@@ -2,7 +2,7 @@
  * @Author: Guoxin Wang
  * @Date: 2025-10-29 12:50:50
  * @LastEditors: Guoxin Wang
- * @LastEditTime: 2025-12-02 13:14:22
+ * @LastEditTime: 2025-12-02 14:29:29
  * @FilePath: /AnnoDesignerWEB/src/App.jsx
  * @Description:
  *
@@ -10,7 +10,7 @@
  */
 
 function App() {
-    const { presets, treeLoc, colors, error } = useAssets();
+    const { presets, webLoc, colors, error } = useAssets();
     const [loc, setLoc] = useState("eng");
     const [placed, setPlaced] = useState([]);
     const [selected, setSelected] = useState([]);
@@ -57,14 +57,14 @@ function App() {
     }, [placed]);
 
     if (error) return <div style={{ padding: 20 }}>加载资源失败：{error}</div>;
-    if (!presets || !treeLoc || !colors)
+    if (!presets || !webLoc || !colors)
         return <div style={{ padding: 20 }}>加载中…</div>;
 
     return (
         <div className="app">
             <Sidebar
                 presets={presets}
-                treeLoc={treeLoc}
+                webLoc={webLoc}
                 colors={colors}
                 loc={loc}
                 placing={placing}

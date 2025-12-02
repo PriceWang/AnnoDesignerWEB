@@ -2,12 +2,13 @@
  * @Author: Guoxin Wang
  * @Date: 2025-10-29 14:03:30
  * @LastEditors: Guoxin Wang
- * @LastEditTime: 2025-12-01 13:27:10
+ * @LastEditTime: 2025-12-02 13:15:03
  * @FilePath: /AnnoDesignerWEB/src/components/Inspector.jsx
  * @Description:
  *
  * Copyright (c) 2025 by Guoxin Wang, All Rights Reserved.
  */
+
 function Inspector({ selected, placed, setPlaced, setSelected }) {
     // ---- helpers ----
     function isExcluded(b) {

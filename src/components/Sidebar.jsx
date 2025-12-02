@@ -2,7 +2,7 @@
  * @Author: Guoxin Wang
  * @Date: 2025-10-29 12:48:16
  * @LastEditors: Guoxin Wang
- * @LastEditTime: 2025-12-02 14:19:35
+ * @LastEditTime: 2025-12-02 14:56:23
  * @FilePath: /AnnoDesignerWEB/src/components/Sidebar.jsx
  * @Description:
  *
@@ -61,7 +61,7 @@ function PaletteItem({ b, active, onPick, loc, schemeColors }) {
 
 function Sidebar({
     presets,
-    treeLoc,
+    webLoc,
     colors,
     loc,
     placing,
@@ -73,13 +73,13 @@ function Sidebar({
     const [version, setVersion] = useState(null);
 
     const buildings = presets?.Buildings ?? [];
-    const languages = treeLoc?.languages ?? {};
+    const languages = webLoc?.languages ?? {};
     const schemeColors = colors?.AvailableSchemes?.[0]?.Colors ?? [];
 
     if (!buildings || !languages) return <div className="sidebar" />;
 
-    const currentTreeLoc = languages[loc];
-    if (!currentTreeLoc) return <div className="sidebar" />;
+    const currentWebLoc = languages[loc];
+    if (!currentWebLoc) return <div className="sidebar" />;
 
     // version list: only keep 1404/2070/2205/1800
     const headers = useMemo(() => {
@@ -114,10 +114,10 @@ function Sidebar({
             );
 
         for (const b of items) {
-            const fac = currentTreeLoc[b.Faction.replace(/\s+/g, "")];
+            const fac = currentWebLoc[b.Faction.replace(/\s+/g, "")];
             if (!fac) continue;
 
-            const group = currentTreeLoc[(b.Group ?? "").replace(/\s+/g, "")];
+            const group = currentWebLoc[(b.Group ?? "").replace(/\s+/g, "")];
 
             if (!facMap[fac]) facMap[fac] = { root: [], groups: {} };
 
@@ -150,7 +150,7 @@ function Sidebar({
             facNames: Object.keys(facMap).sort(),
             orderGroups,
         };
-    }, [buildings, currentTreeLoc, currentVersion, loc]);
+    }, [buildings, currentWebLoc, currentVersion, loc]);
 
     // initialize / update collapsed state (on version / language change)
     useEffect(() => {
@@ -251,7 +251,7 @@ function Sidebar({
                 <input
                     id="sidebar-search"
                     className="search"
-                    placeholder="搜索"
+                    placeholder={currentWebLoc["(WEB)Search"] || "Search"}
                     value={filterText}
                     onChange={(e) => setFilterText(e.target.value.trimStart())}
                 />
