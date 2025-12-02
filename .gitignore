@@ -184,5 +184,5 @@ start*.sh
 
 # local config
 **/test*.*
-**/rda/*
+**/test/*
 .DS_Store
