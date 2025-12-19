@@ -2,7 +2,7 @@
  * @Author: Guoxin Wang
  * @Date: 2025-10-29 12:50:50
  * @LastEditors: Guoxin Wang
- * @LastEditTime: 2025-12-08 16:14:59
+ * @LastEditTime: 2025-12-19 23:03:02
  * @FilePath: /AnnoDesignerWEB/src/components/Canvas.jsx
  * @Description:
  *
@@ -66,7 +66,10 @@ function PlacingBlock({ item, ghostCan, schemeColors }) {
         >
             {item.b?.IconFileName && (
                 <image
-                    href={"./assets/icons/" + item.b?.IconFileName}
+                    href={
+                        "./assets/icons/" +
+                        item.b?.IconFileName.replace(/\s+/g, "_").toLowerCase()
+                    }
                     x={wTiles * 0.1}
                     y={hTiles * 0.1}
                     width={wTiles * 0.8}
@@ -132,7 +135,10 @@ function PlacedBlock({ item, schemeColors, canSelect, onSelect, cross }) {
             />
             {item.b.IconFileName && (
                 <image
-                    href={"./assets/icons/" + item.b.IconFileName}
+                    href={
+                        "./assets/icons/" +
+                        item.b.IconFileName.replace(/\s+/g, "_").toLowerCase()
+                    }
                     x={wTiles * 0.1}
                     y={hTiles * 0.1}
                     width={wTiles * 0.8}
@@ -175,7 +181,10 @@ function SelectedBlock({ item, schemeColors, placingActive }) {
             />
             {item.b.IconFileName && (
                 <image
-                    href={"./assets/icons/" + item.b.IconFileName}
+                    href={
+                        "./assets/icons/" +
+                        item.b.IconFileName.replace(/\s+/g, "_").toLowerCase()
+                    }
                     x={wTiles * 0.1}
                     y={hTiles * 0.1}
                     width={wTiles * 0.8}

@@ -2,7 +2,7 @@
  * @Author: Guoxin Wang
  * @Date: 2025-10-29 12:48:16
  * @LastEditors: Guoxin Wang
- * @LastEditTime: 2025-12-03 12:51:56
+ * @LastEditTime: 2025-12-19 23:02:08
  * @FilePath: /AnnoDesignerWEB/src/components/Sidebar.jsx
  * @Description:
  *
@@ -28,7 +28,9 @@ function CollapsibleGroup({ title, count, isCollapsed, onToggle, children }) {
 // palette item
 function PaletteItem({ b, active, onPick, loc, schemeColors }) {
     const name = b.Localization?.[loc] || b.Localization?.eng || "Unknown";
-    const icon = b.IconFileName ? `./assets/icons/${b.IconFileName}` : null;
+    const icon = b.IconFileName
+        ? `./assets/icons/${b.IconFileName.replace(/\s+/g, "_").toLowerCase()}`
+        : null;
     const itemClass = `item${active ? " active" : ""}`;
 
     const IMG = icon ? (

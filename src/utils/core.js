@@ -2,7 +2,7 @@
  * @Author: Guoxin Wang
  * @Date: 2025-10-29 12:48:16
  * @LastEditors: Guoxin Wang
- * @LastEditTime: 2025-12-16 17:00:28
+ * @LastEditTime: 2025-12-19 23:05:01
  * @FilePath: /AnnoDesignerWEB/src/utils/core.js
  * @Description:
  *
@@ -128,7 +128,9 @@ function exportJSON(items) {
     };
     for (const it of items) {
         const iconFileName = it.b.IconFileName
-            ? it.b.IconFileName.replace(/\.png$/i, "")
+            ? it.b.IconFileName.replace(/\s+/g, "_")
+                  .toLowerCase()
+                  .replace(/\.png$/i, "")
             : null;
         layout.Objects.push({
             Identifier: it.b.Identifier,
