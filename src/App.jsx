@@ -2,7 +2,7 @@
  * @Author: Guoxin Wang
  * @Date: 2025-10-29 12:50:50
  * @LastEditors: Guoxin Wang
- * @LastEditTime: 2025-12-02 14:29:29
+ * @LastEditTime: 2025-12-16 16:48:18
  * @FilePath: /AnnoDesignerWEB/src/App.jsx
  * @Description:
  *
@@ -15,7 +15,6 @@ function App() {
     const [placed, setPlaced] = useState([]);
     const [selected, setSelected] = useState([]);
     const [placing, setPlacing] = useState([]);
-    const [zoom, setZoom] = useState(1);
 
     // hydrate from localStorage (must be declared before early returns to keep hooks order constant)
     useEffect(() => {
@@ -56,9 +55,9 @@ function App() {
         return () => clearTimeout(timer);
     }, [placed]);
 
-    if (error) return <div style={{ padding: 20 }}>加载资源失败：{error}</div>;
+    if (error) return <div style={{ padding: 20 }}>loading error: {error}</div>;
     if (!presets || !webLoc || !colors)
-        return <div style={{ padding: 20 }}>加载中…</div>;
+        return <div style={{ padding: 20 }}>loading…</div>;
 
     return (
         <div className="app">
@@ -72,34 +71,16 @@ function App() {
                 setSelected={setSelected}
             />
             <div className="center">
-                <div className="toolbar-wrap">
-                    <Toolbar
-                        loc={loc}
-                        setLoc={setLoc}
-                        placed={placed}
-                        setPlaced={setPlaced}
-                        zoom={zoom}
-                        setZoom={setZoom}
-                        placing={placing}
-                        onResetView={() => {
-                            // Use ref instead of direct DOM query for better performance and React patterns
-                            const stageElement =
-                                document.getElementById("stage");
-                            if (stageElement) {
-                                stageElement.scrollTo({
-                                    left: 0,
-                                    top: 0,
-                                    behavior: "smooth",
-                                });
-                            }
-                            setZoom(1);
-                        }}
-                    />
-                </div>
+                <Toolbar
+                    presets={presets}
+                    webLoc={webLoc}
+                    loc={loc}
+                    setLoc={setLoc}
+                    placed={placed}
+                    setPlaced={setPlaced}
+                />
                 <Canvas
                     colors={colors}
-                    zoom={zoom}
-                    setZoom={setZoom}
                     placing={placing}
                     setPlacing={setPlacing}
                     placed={placed}
@@ -109,13 +90,11 @@ function App() {
                 />
             </div>
             <Inspector
-                selected={selected}
+                webLoc={webLoc}
+                loc={loc}
                 placed={placed}
-                setPlaced={setPlaced}
-                setSelected={setSelected}
+                selected={selected}
             />
         </div>
     );
 }
-
-window.App = App;

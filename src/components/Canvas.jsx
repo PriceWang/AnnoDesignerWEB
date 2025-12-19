@@ -2,7 +2,7 @@
  * @Author: Guoxin Wang
  * @Date: 2025-10-29 12:50:50
  * @LastEditors: Guoxin Wang
- * @LastEditTime: 2025-12-02 13:09:29
+ * @LastEditTime: 2025-12-08 16:14:59
  * @FilePath: /AnnoDesignerWEB/src/components/Canvas.jsx
  * @Description:
  *
@@ -19,9 +19,9 @@ function getBlockDimensions(b, rotation) {
     };
 }
 
-function Influence({ b, cx, cy }) {
-    const r = Math.abs(b.InfluenceRadius || 0) * TILE;
-    const d = Math.abs(b.InfluenceRange || 0) * TILE;
+function Influence({ influenceRadius, influenceRange, cx, cy }) {
+    const r = Math.abs(influenceRadius || 0) * TILE;
+    const d = Math.abs(influenceRange || 0) * TILE;
     if (!r && !d) return null;
 
     const commonProps = {
@@ -52,7 +52,7 @@ function Influence({ b, cx, cy }) {
 }
 
 function PlacingBlock({ item, ghostCan, schemeColors }) {
-    const { wTiles, hTiles } = getBlockDimensions(item.b, item.r);
+    const { wTiles, hTiles } = getBlockDimensions(item.b, item.direction);
     const cx = item.x + wTiles / 2;
     const cy = item.y + hTiles / 2;
 
@@ -82,26 +82,30 @@ function PlacingBlock({ item, ghostCan, schemeColors }) {
                 height={hTiles}
                 fill={
                     ghostCan
-                        ? annoColorCSS(item.b, 0.3, schemeColors)
+                        ? annoColorCSS(item.color, item.b, 0.3, schemeColors)
                         : "rgba(255, 0, 0, 0.3)"
                 }
                 stroke={ghostCan ? "rgba(0,0,255,0.5)" : "rgba(255,0,0,0.5)"}
                 strokeWidth={2}
                 vectorEffect="non-scaling-stroke"
             />
-            <Influence b={item.b} cx={wTiles / 2} cy={hTiles / 2} />
+            <Influence
+                influenceRadius={item.radius}
+                influenceRange={item.influenceRange}
+                cx={wTiles / 2}
+                cy={hTiles / 2}
+            />
         </g>
     );
 }
 
 function PlacedBlock({ item, schemeColors, canSelect, onSelect, cross }) {
-    const { wTiles, hTiles } = getBlockDimensions(item.b, item.r);
+    const { wTiles, hTiles } = getBlockDimensions(item.b, item.direction);
     const cx = item.x + wTiles / 2;
     const cy = item.y + hTiles / 2;
 
     return (
         <g
-            data-placed="1"
             transform={`
                 translate(${cx}, ${cy})
                 translate(${-wTiles / 2}, ${-hTiles / 2})
@@ -115,8 +119,12 @@ function PlacedBlock({ item, schemeColors, canSelect, onSelect, cross }) {
                 width={wTiles}
                 height={hTiles}
                 fill={
-                    annoColorCSS(item.b, cross ? 0.3 : null, schemeColors) ||
-                    "none"
+                    annoColorCSS(
+                        item.color,
+                        item.b,
+                        cross ? 0.3 : null,
+                        schemeColors
+                    ) || "none"
                 }
                 stroke="#000"
                 strokeWidth={item.b.Borderless ? 0 : 1}
@@ -141,13 +149,12 @@ function PlacedBlock({ item, schemeColors, canSelect, onSelect, cross }) {
 }
 
 function SelectedBlock({ item, schemeColors, placingActive }) {
-    const { wTiles, hTiles } = getBlockDimensions(item.b, item.r);
+    const { wTiles, hTiles } = getBlockDimensions(item.b, item.direction);
     const cx = item.x + wTiles / 2;
     const cy = item.y + hTiles / 2;
 
     return (
         <g
-            data-placed="1"
             transform={`
                 translate(${cx}, ${cy})
                 translate(${-wTiles / 2}, ${-hTiles / 2})
@@ -159,7 +166,9 @@ function SelectedBlock({ item, schemeColors, placingActive }) {
                 y="0"
                 width={wTiles}
                 height={hTiles}
-                fill={annoColorCSS(item.b, 1, schemeColors) || "none"}
+                fill={
+                    annoColorCSS(item.color, item.b, 1, schemeColors) || "none"
+                }
                 stroke={"#0062ffff"}
                 strokeWidth={2}
                 vectorEffect="non-scaling-stroke"
@@ -178,15 +187,18 @@ function SelectedBlock({ item, schemeColors, placingActive }) {
                     `}
                 />
             )}
-            <Influence b={item.b} cx={wTiles / 2} cy={hTiles / 2} />
+            <Influence
+                influenceRadius={item.radius}
+                influenceRange={item.influenceRange}
+                cx={wTiles / 2}
+                cy={hTiles / 2}
+            />
         </g>
     );
 }
 
 function Canvas({
     colors,
-    zoom,
-    setZoom,
     placing,
     setPlacing,
     placed,
@@ -196,6 +208,7 @@ function Canvas({
 }) {
     const schemeColors = colors?.AvailableSchemes?.[0]?.Colors || [];
 
+    const [zoom, setZoom] = useState(1);
     const [ghost, setGhost] = useState({
         visible: false,
         x: 0,
@@ -442,10 +455,13 @@ function Canvas({
                     if (e.key === "c" || e.key === "C") {
                         e.preventDefault();
                         const candidate = selectedRef.current.map((it) => ({
+                            b: it.b,
                             x: it.x,
                             y: it.y,
-                            b: it.b,
-                            r: it.r,
+                            color: it.color,
+                            radius: it.radius,
+                            influenceRange: it.influenceRange,
+                            direction: it.direction,
                         }));
                         setPlacing(candidate);
                         computeGhost(candidate, gRotRef.current);
@@ -453,10 +469,13 @@ function Canvas({
                     } else if (e.key === "x" || e.key === "X") {
                         e.preventDefault();
                         const candidate = selectedRef.current.map((it) => ({
+                            b: it.b,
                             x: it.x,
                             y: it.y,
-                            b: it.b,
-                            r: it.r,
+                            color: it.color,
+                            radius: it.radius,
+                            influenceRange: it.influenceRange,
+                            direction: it.direction,
                         }));
                         setPlacing(candidate);
                         computeGhost(candidate, gRotRef.current);
@@ -520,22 +539,7 @@ function Canvas({
         const worldX = worldPos.x;
         const worldY = worldPos.y;
 
-        let minX = Infinity;
-        let minY = Infinity;
-        let maxX = -Infinity;
-        let maxY = -Infinity;
-
-        for (const it of items) {
-            const wb = it.b?.BuildBlocker?.x || 1;
-            const hb = it.b?.BuildBlocker?.z || 1;
-            const swap0 = it.r % 180 !== 0;
-            const w0 = (swap0 ? hb : wb) * TILE;
-            const h0 = (swap0 ? wb : hb) * TILE;
-            minX = Math.min(it.x, minX);
-            minY = Math.min(it.y, minY);
-            maxX = Math.max(it.x + w0, maxX);
-            maxY = Math.max(it.y + h0, maxY);
-        }
+        const { minX, minY, maxX, maxY } = boundingBox(items);
 
         const gSwap = rot % 180 !== 0;
         const rotation = Math.floor(rot / 90);
@@ -562,7 +566,7 @@ function Canvas({
             const wb = it.b?.BuildBlocker?.x || 1;
             const hb = it.b?.BuildBlocker?.z || 1;
 
-            const swap0 = it.r % 180 !== 0;
+            const swap0 = it.direction % 180 !== 0;
             const w0 = (swap0 ? hb : wb) * TILE;
             const h0 = (swap0 ? wb : hb) * TILE;
 
@@ -584,7 +588,7 @@ function Canvas({
                 ry = -ox;
             }
 
-            const swap1 = (it.r + rot) % 180 !== 0;
+            const swap1 = (it.direction + rot) % 180 !== 0;
             const w1 = (swap1 ? hb : wb) * TILE;
             const h1 = (swap1 ? wb : hb) * TILE;
 
@@ -594,12 +598,15 @@ function Canvas({
             const yb = icy1 - h1 / 2;
 
             candidate.push({
+                b: it.b,
                 x: xb,
                 y: yb,
                 w: w1,
                 h: h1,
-                b: it.b,
-                r: (it.r + rot) % 360,
+                color: it.color,
+                radius: it.radius,
+                influenceRange: it.influenceRange,
+                direction: (it.direction + rot) % 360,
             });
 
             if (
@@ -670,12 +677,15 @@ function Canvas({
         setPlaced((p) => {
             const additions = g.candidate.map((it) => ({
                 id: crypto.randomUUID(),
+                b: it.b,
                 x: it.x,
                 y: it.y,
                 w: it.w,
                 h: it.h,
-                b: it.b,
-                r: it.r,
+                color: it.color,
+                radius: it.radius,
+                influenceRange: it.influenceRange,
+                direction: it.direction,
             }));
             const items = p.concat(additions);
             placedRef.current = items;
@@ -698,6 +708,7 @@ function Canvas({
             ref={wrapRef}
         >
             <svg
+                id="main-svg"
                 width={GRID_W * zoom}
                 height={GRID_H * zoom}
                 style={{
@@ -787,5 +798,3 @@ function Canvas({
         </div>
     );
 }
-
-window.Canvas = Canvas;

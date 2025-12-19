@@ -2,7 +2,7 @@
  * @Author: Guoxin Wang
  * @Date: 2025-10-29 12:48:16
  * @LastEditors: Guoxin Wang
- * @LastEditTime: 2025-12-02 16:11:21
+ * @LastEditTime: 2025-12-03 12:51:56
  * @FilePath: /AnnoDesignerWEB/src/components/Sidebar.jsx
  * @Description:
  *
@@ -44,7 +44,7 @@ function PaletteItem({ b, active, onPick, loc, schemeColors }) {
         >
             <img
                 style={{
-                    backgroundColor: annoColorCSS(b, null, schemeColors),
+                    backgroundColor: annoColorCSS(null, b, null, schemeColors),
                     width: "70%",
                 }}
             />
@@ -232,7 +232,17 @@ function Sidebar({
 
     const handlePick = useCallback(
         (b) => {
-            setPlacing([{ x: 0, y: 0, b, r: 0 }]);
+            setPlacing([
+                {
+                    b,
+                    x: 0,
+                    y: 0,
+                    color: cssColorAnno(b, schemeColors),
+                    radius: b.InfluenceRadius,
+                    influenceRange: b.InfluenceRange,
+                    direction: 0,
+                },
+            ]);
             setSelected([]);
         },
         [setPlacing, setSelected]
@@ -399,5 +409,3 @@ function Sidebar({
         </div>
     );
 }
-
-window.Sidebar = Sidebar;

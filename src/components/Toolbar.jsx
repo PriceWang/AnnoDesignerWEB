@@ -2,148 +2,209 @@
  * @Author: Guoxin Wang
  * @Date: 2025-10-29 12:48:16
  * @LastEditors: Guoxin Wang
- * @LastEditTime: 2025-12-01 13:27:13
+ * @LastEditTime: 2025-12-16 16:23:05
  * @FilePath: /AnnoDesignerWEB/src/components/Toolbar.jsx
  * @Description:
  *
  * Copyright (c) 2025 by Guoxin Wang, All Rights Reserved.
  */
-function Toolbar({ loc, setLoc, placed, setPlaced, zoom, setZoom, placing }) {
-    function exportJSON() {
-        const blob = new Blob([JSON.stringify(placed, null, 2)], {
-            type: "application/json",
-        });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "layout.json";
-        a.click();
-        URL.revokeObjectURL(url);
-    }
-    const [helpOpen, setHelpOpen] = useState(false);
+
+function Toolbar({ presets, webLoc, loc, setLoc, placed, setPlaced }) {
+    const languages = webLoc?.languages || {};
+    const [windowOpen, setWindowOpen] = useState(0);
+
+    const toolbarRef = useRef(null);
+
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (
+                windowOpen !== 0 &&
+                toolbarRef.current &&
+                !toolbarRef.current.contains(e.target)
+            ) {
+                setWindowOpen(0);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [windowOpen]);
+
+    const togglePanel = (id) => {
+        setWindowOpen((prev) => (prev === id ? 0 : id));
+    };
+
     return (
-        <div className="toolbar">
+        <div className="toolbar" ref={toolbarRef}>
             <button
-                className="toolbar-button"
-                title="切换语言 / Switch Language"
-                onClick={() => setLoc(loc === "zhs" ? "eng" : "zhs")}
-            >
-                {loc === "zhs" ? "EN" : "中"}
-            </button>
-            <button
-                type="button"
                 className="button"
-                onClick={() => setPlaced([])}
+                onClick={() => {
+                    setPlaced([]);
+                    togglePanel(0);
+                }}
             >
-                清空
+                <span class="material-symbols-rounded">draft</span>
             </button>
-            <button type="button" className="button" onClick={exportJSON}>
-                导出JSON
-            </button>
-            <label className="button">
-                导入JSON
+            <label className="button" onClick={() => togglePanel(0)}>
+                <span class="material-symbols-rounded">file_open</span>
                 <input
                     type="file"
-                    accept="application/json"
+                    accept="application/ad"
                     style={{ display: "none" }}
                     onChange={(e) => {
                         const f = e.target.files?.[0];
                         if (!f) return;
-                        const r = new FileReader();
-                        r.onload = () => {
-                            try {
-                                const d = JSON.parse(r.result);
-                                setPlaced(Array.isArray(d) ? d : []);
-                            } catch {}
-                        };
-                        r.readAsText(f);
+                        loadJSON(f, setPlaced, presets?.Buildings ?? []);
+                        e.target.value = "";
                     }}
                 />
             </label>
-            <span className="button">缩放: {Math.round(zoom * 100)}%</span>
-            {placing && (
-                <span className="button">
-                    放置中：
-                    {placing.Localization?.zhs || placing.Localization?.eng}
-                </span>
-            )}
-            <button
-                type="button"
-                className="button"
-                onClick={() => setHelpOpen((v) => !v)}
-            >
-                快捷键
+            <button className="button" onClick={() => exportJSON(placed)}>
+                <span class="material-symbols-rounded">save</span>
             </button>
-            {helpOpen && (
-                <div className="hotkeys-panel">
-                    <h4>快捷键</h4>
-                    <ul>
-                        <li>
-                            <span class="kbd">⌘</span>/
-                            <span class="kbd">Ctrl</span> +{" "}
-                            <span class="kbd">C</span>{" "}
-                            <span class="desc">
-                                克隆并进入连续放置（保留旋转）
-                            </span>
-                        </li>
-                        <li>
-                            <span class="kbd">⌘</span>/
-                            <span class="kbd">Ctrl</span> +{" "}
-                            <span class="kbd">X</span>{" "}
-                            <span class="desc">
-                                剪切并进入一次性放置（保留旋转）
-                            </span>
-                        </li>
-                        <li>
-                            <span class="kbd">R</span>{" "}
-                            <span class="desc">
-                                放置模式旋转 90°（光标保持中心；图标不旋转）
-                            </span>
-                        </li>
-                        <li>
-                            <span class="kbd">左键</span>{" "}
-                            <span class="desc">放置（一次/连续）</span>
-                        </li>
-                        <li>
-                            <span class="kbd">右键</span>/
-                            <span class="kbd">Esc</span>{" "}
-                            <span class="desc">退出放置模式</span>
-                        </li>
-                        <li>
-                            <span class="kbd">Alt</span> +{" "}
-                            <span class="kbd">左键</span>{" "}
-                            <span class="desc">抓手平移</span>
-                        </li>
-                        <li>
-                            <span class="kbd">中键</span>{" "}
-                            <span class="desc">旋转 90°（放置模式）</span>
-                        </li>
-                        <li>
-                            <span class="kbd">滚轮</span>{" "}
-                            <span class="desc">缩放（50%–200%）</span>
-                        </li>
-                        <li>
-                            <span class="kbd">Delete</span>{" "}
-                            <span class="desc">删除选中对象</span>
-                        </li>
-                    </ul>
-                </div>
-            )}
+            <button
+                className="button"
+                onClick={() => {
+                    let { minX, minY, maxX, maxY } = boundingBox(placed);
+                    minX = Math.max(minX - 10 * TILE, 0);
+                    minY = Math.max(minY - 10 * TILE, 0);
+                    maxX = Math.min(maxX + 10 * TILE, GRID_W);
+                    maxY = Math.min(maxY + 10 * TILE, GRID_H);
+                    const svg = document.querySelector("#main-svg");
+                    export2PNG(svg, minX, minY, maxX, maxY, 4);
+                }}
+            >
+                <span class="material-symbols-rounded">ios_share</span>
+            </button>
+            <div className="toolbar-panel-wrap">
+                <button className="button" onClick={() => togglePanel(1)}>
+                    <span class="material-symbols-rounded">language</span>
+                </button>
+                {windowOpen === 1 && (
+                    <select
+                        className="toolbar-panel"
+                        value={loc || "eng"}
+                        onChange={(e) => {
+                            togglePanel(0);
+                            setLoc(e.target.value);
+                        }}
+                    >
+                        <option value="eng">English</option>
+                        <option value="esp">Español</option>
+                        <option value="fra">Français</option>
+                        <option value="ger">Deutsch</option>
+                        <option value="ita">Italiano</option>
+                        <option value="pol">Polski</option>
+                        <option value="rus">Русский</option>
+                        <option value="zhs">简体中文</option>
+                        <option value="zht">繁體中文</option>
+                    </select>
+                )}
+            </div>
+            <div className="toolbar-panel-wrap">
+                <button className="button" onClick={() => togglePanel(2)}>
+                    <span class="material-symbols-rounded">help</span>
+                </button>
+                {windowOpen === 2 && (
+                    <div className="toolbar-panel">
+                        <ul>
+                            <li>
+                                <span class="kbd">
+                                    {languages[loc]["(TOOLBAR_KBD)Command"]}
+                                </span>{" "}
+                                /{" "}
+                                <span class="kbd">
+                                    {languages[loc]["(TOOLBAR_KBD)Ctrl"]}
+                                </span>
+                                +
+                                <span class="kbd">
+                                    {languages[loc]["(TOOLBAR_KBD)C"]}
+                                </span>{" "}
+                                <span class="desc">
+                                    {languages[loc]["(TOOLBAR_DESC)Copy"]}
+                                </span>
+                            </li>
+                            <li>
+                                <span class="kbd">
+                                    {languages[loc]["(TOOLBAR_KBD)Command"]}
+                                </span>{" "}
+                                /{" "}
+                                <span class="kbd">
+                                    {languages[loc]["(TOOLBAR_KBD)Ctrl"]}
+                                </span>
+                                +
+                                <span class="kbd">
+                                    {languages[loc]["(TOOLBAR_KBD)X"]}
+                                </span>{" "}
+                                <span class="desc">
+                                    {languages[loc]["(TOOLBAR_DESC)Cut"]}
+                                </span>
+                            </li>
+                            <li>
+                                <span class="kbd">
+                                    {languages[loc]["(TOOLBAR_KBD)R"]}
+                                </span>{" "}
+                                <span class="desc">
+                                    {languages[loc]["(TOOLBAR_DESC)Rotate"]}
+                                </span>
+                            </li>
+                            <li>
+                                <span class="kbd">
+                                    {languages[loc]["(TOOLBAR_KBD)LeftClick"]}
+                                </span>{" "}
+                                <span class="desc">
+                                    {languages[loc]["(TOOLBAR_DESC)Place"]}
+                                </span>
+                            </li>
+                            <li>
+                                <span class="kbd">
+                                    {languages[loc]["(TOOLBAR_KBD)RightClick"]}
+                                </span>{" "}
+                                /{" "}
+                                <span class="kbd">
+                                    {languages[loc]["(TOOLBAR_KBD)Esc"]}
+                                </span>{" "}
+                                <span class="desc">
+                                    {languages[loc]["(TOOLBAR_DESC)Exit"]}
+                                </span>
+                            </li>
+                            <li>
+                                <span class="kbd">
+                                    {languages[loc]["(TOOLBAR_KBD)Alt"]}
+                                </span>
+                                +
+                                <span class="kbd">
+                                    {languages[loc]["(TOOLBAR_KBD)LeftClick"]}
+                                </span>{" "}
+                                <span class="desc">
+                                    {languages[loc]["(TOOLBAR_DESC)Pan"]}
+                                </span>
+                            </li>
+                            <li>
+                                <span class="kbd">
+                                    {languages[loc]["(TOOLBAR_KBD)MouseWheel"]}
+                                </span>{" "}
+                                <span class="desc">
+                                    {languages[loc]["(TOOLBAR_DESC)Zoom"]}
+                                </span>
+                            </li>
+                            <li>
+                                <span class="kbd">
+                                    {languages[loc]["(TOOLBAR_KBD)Delete"]}
+                                </span>{" "}
+                                /{" "}
+                                <span class="kbd">
+                                    {languages[loc]["(TOOLBAR_KBD)Backspace"]}
+                                </span>{" "}
+                                <span class="desc">
+                                    {languages[loc]["(TOOLBAR_DESC)Delete"]}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
-
-function exportJSON() {
-    const blob = new Blob([JSON.stringify(placed, null, 2)], {
-        type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "layout.json";
-    a.click();
-    URL.revokeObjectURL(url);
-}
-
-window.Toolbar = Toolbar;
-window.exportJSON = exportJSON;
